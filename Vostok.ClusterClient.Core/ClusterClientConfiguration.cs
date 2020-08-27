@@ -37,7 +37,8 @@ namespace Vostok.Clusterclient.Core
                 LogRequestDetails = ClusterClientDefaults.LogRequestDetails,
                 LogResultDetails = ClusterClientDefaults.LogResultDetails,
                 LogReplicaRequests = ClusterClientDefaults.LogReplicaRequests,
-                LogReplicaResults = ClusterClientDefaults.LogReplicaResults
+                LogReplicaResults = ClusterClientDefaults.LogReplicaResults,
+                ErrorResponseCriteria = new List<IResponseCriterion>()
             };
 
             ConnectionAttempts = ClusterClientDefaults.ConnectionAttempts;
@@ -117,6 +118,9 @@ namespace Vostok.Clusterclient.Core
             if (ResponseCriteria != null && ResponseCriteria.Any(criterion => criterion == null))
                 yield return "One of provided response criteria is null";
 
+            if (Logging.ErrorResponseCriteria != null && Logging.ErrorResponseCriteria.Any(criterion => criterion == null))
+                yield return "One of provided response criteria for logging is null";
+
             if (RequestTransforms != null && RequestTransforms.Any(transform => transform == null))
                 yield return "One of provided request transforms is null";
 
@@ -180,6 +184,9 @@ namespace Vostok.Clusterclient.Core
 
             if (ClientApplicationName == null)
                 ClientApplicationName = ClusterClientDefaults.ClientApplicationName;
+
+            if (Logging.ErrorResponseCriteria == null || Logging.ErrorResponseCriteria.Count == 0)
+                Logging.ErrorResponseCriteria = ClusterClientDefaults.LoggingResponseCriteria();
         }
     }
 }

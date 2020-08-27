@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using JetBrains.Annotations;
+using Vostok.Clusterclient.Core.Criteria;
+using Vostok.Clusterclient.Core.Model;
 
 namespace Vostok.Clusterclient.Core.Misc
 {
@@ -31,5 +34,12 @@ namespace Vostok.Clusterclient.Core.Misc
         /// <para>This parameter is optional and has a default value (see <see cref="ClusterClientDefaults.LogReplicaResults"/>).</para>
         /// </summary>
         public bool LogReplicaResults { get; set; } = ClusterClientDefaults.LogReplicaResults;
+
+        /// <summary>
+        /// <para>A list of response criteria. See <see cref="IResponseCriterion"/> and <see cref="ResponseVerdict"/> for more details.</para>
+        /// <para>These criteria are used to determine whether unsuccessful cluster result should be logged as an Error or as a Warning. <see cref="ClusterResultStatus.Success"/>.</para>
+        /// <para>This parameter is optional and has a default value (see <see cref="Core.ClusterClientDefaults.LoggingResponseCriteria"/>).</para>
+        /// </summary>
+        public List<IResponseCriterion> ErrorResponseCriteria { get; set; }
     }
 }

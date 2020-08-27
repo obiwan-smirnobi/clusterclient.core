@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Vostok.Clusterclient.Core.Criteria;
+using Vostok.Clusterclient.Core.Misc;
 using Vostok.Clusterclient.Core.Model;
 using Vostok.Commons.Time;
 using Vostok.Logging.Abstractions;
@@ -8,25 +10,25 @@ namespace Vostok.Clusterclient.Core.Modules
 {
     internal class LoggingModule : IRequestModule
     {
-        private readonly bool logRequests;
-        private readonly bool logResults;
+        private readonly IResponseClassifier responseClassifier;
+        private readonly LoggingOptions options;
         private readonly string targetService;
 
-        public LoggingModule(bool logRequests, bool logResults, string targetService)
+        public LoggingModule(IResponseClassifier responseClassifier, LoggingOptions options, string targetService)
         {
-            this.logRequests = logRequests;
-            this.logResults = logResults;
+            this.responseClassifier = responseClassifier;
+            this.options = options;
             this.targetService = targetService;
         }
 
         public async Task<ClusterResult> ExecuteAsync(IRequestContext context, Func<IRequestContext, Task<ClusterResult>> next)
         {
-            if (logRequests)
+            if (options.LogReplicaRequests)
                 LogRequestDetails(context);
 
             var result = await next(context).ConfigureAwait(false);
 
-            if (logResults)
+            if (options.LogReplicaResults)
             {
                 if (result.Status == ClusterResultStatus.Success)
                     LogSuccessfulResult(context, result);
@@ -74,9 +76,17 @@ namespace Vostok.Clusterclient.Core.Modules
             };
 
             if (result.Status == ClusterResultStatus.Canceled)
+            {
                 context.Log.Warn(message, properties);
+            }
             else
-                context.Log.Error(message, properties);
+            {
+                var verdict = responseClassifier.Decide(result.Response, options.ErrorResponseCriteria);
+                if (verdict == ResponseVerdict.Accept)
+                    context.Log.Warn(message, properties);
+                else
+                    context.Log.Error(message, properties);
+            }
         }
 
         #endregion

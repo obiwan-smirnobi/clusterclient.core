@@ -182,6 +182,15 @@ namespace Vostok.Clusterclient.Core
             };
         }
 
+        /// <returns>The default value of <see cref="LoggingOptions.ErrorResponseCriteria"/>.</returns>
+        public static List<IResponseCriterion> LoggingResponseCriteria()
+        {
+            return new List<IResponseCriterion>
+            {
+                new AlwaysRejectCriterion(),
+            };
+        }
+
         /// <returns>The default value of <see cref="IClusterClientConfiguration.ReplicaOrdering"/>.</returns>
         public static IReplicaOrdering ReplicaOrdering(ILog log)
         {
